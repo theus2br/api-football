@@ -3,9 +3,8 @@ import json
 import openpyxl
 import os
 
-# Configurar API
 url = "https://v3.football.api-sports.io/fixtures/headtohead"
-params = {"h2h": "124-127"}  # Substituir pelos IDs corretos
+params = {"h2h": "124-127"} 
 headers = {
     "x-rapidapi-host": "v3.football.api-sports.io",
     "x-rapidapi-key": "c71bb04ba5fcde0f4472c79fdc30a088"
@@ -14,12 +13,10 @@ headers = {
 response = requests.get(url, headers=headers, params=params)
 data = response.json()
 
-# Pegar os times
 first_match = data.get("response", [])[0]
 time1 = first_match["teams"]["home"]["name"]
 time2 = first_match["teams"]["away"]["name"]
 
-# Inicializar contadores de vitórias
 vitorias_time1 = 0
 vitorias_time2 = 0
 vitorias_time1_casa = 0
@@ -52,14 +49,12 @@ def definir_vencedor(match):
                 vitorias_time2 += 1
                 vitorias_time2_fora += 1
 
-# Processar partidas
 total_partidas = 0
 for match in data.get("response", []):
-    if match["fixture"]["status"]["short"] == "FT":  # Apenas jogos finalizados
+    if match["fixture"]["status"]["short"] == "FT": 
         definir_vencedor(match)
         total_partidas += 1
 
-# Abrir ou criar o arquivo Excel
 file_path = "dados1.xlsx"
 if os.path.exists(file_path):
     wb = openpyxl.load_workbook(file_path)
@@ -67,7 +62,6 @@ else:
     wb = openpyxl.Workbook()
 sheet = wb.active
 
-# Escrever os dados no Excel
 sheet["A1"] = "Estatísticas de confrontos diretos"
 sheet["A2"] = f"Total de partidas: {total_partidas}"
 sheet["A3"] = f"Vitórias de {time1}: {vitorias_time1}"
