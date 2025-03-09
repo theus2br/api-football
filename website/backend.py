@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_from_directory
 import pandas as pd
 import requests
 from datetime import datetime, timedelta
@@ -36,7 +36,11 @@ def identifica_ganhador(confronto):
 ## exemplo de rota para caso queira retornar uma pagina html
 @app.route("/")
 def home():
-    return render_template("login.html")
+    return render_template("index.html")
+
+@app.route("/download-csv")
+def download_csv():
+    return send_from_directory('temp', 'dados.csv')
 
 @app.route("/head-to-head")
 def head_to_head():
@@ -56,6 +60,8 @@ def head_to_head():
     
     df = df[['data','liga','rodada','arbitro','mando_de_campo','vencedor','placar']]
 
+    df.to_csv('dados.csv', index=False)
+    
     ## retornando o dataframe no formato JSON, como exemplo de utilizacao
     return jsonify(df.to_json())
 
