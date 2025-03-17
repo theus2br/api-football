@@ -7,21 +7,14 @@ from collections import Counter
 app = Flask(__name__)
 
 ## funcao para chamar a API
-def api_football(id1, id2):
+def api_football(endpoint, params):
 
-    url = 'https://v3.football.api-sports.io/fixtures/headtohead'
+    url = f'https://v3.football.api-sports.io/{endpoint}'
 
     headers = {
         'x-rapidapi-host': 'v3.football.api-sports.io',
         'x-rapidapi-key': 'c71bb04ba5fcde0f4472c79fdc30a088'
     }
-
-    params = {
-        'h2h': f'{id1}-{id2}',
-        'from': '2020-01-01',
-        'to': datetime.strftime(datetime.now(),'%Y-%m-%d')
-    }
-
     return requests.get(url, headers=headers, params=params).json()
 
 ## funcao que identifica o ganhador de cada confronto
@@ -46,7 +39,12 @@ def download_csv():
 def head_to_head():
     id1 = request.args.get('id1')
     id2 = request.args.get('id2')
-    response = api_football(id1, id2)
+    params = {
+        'h2h': f'{id1}-{id2}',
+        'from': '2020-01-01',
+        'to': datetime.strftime(datetime.now(),'%Y-%m-%d')
+    }
+    response = api_football('fixtures/headtohead', params)
 
     ## criando o dataframe e formatando as features
     df = pd.DataFrame(response['response'])
@@ -64,6 +62,17 @@ def head_to_head():
     
     ## retornando o dataframe no formato JSON, como exemplo de utilizacao
     return jsonify(df.to_json())
+
+@app.route("/get-teams")
+def get_times():
+
+    league = request.args.get('league')
+    params = {
+        "league": league,
+        "season": 2023
+    }
+
+    return jsonify(api_football('teams',params))
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0',port=5000, debug=True)
